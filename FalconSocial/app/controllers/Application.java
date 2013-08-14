@@ -25,7 +25,7 @@ public class Application extends Controller {
 	public static Result index() {
 		return ok(index.render("Your Falcon Social Application is ready!"));
 	}
-	
+
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result publish() {
 		JsonNode json = request().body().asJson();
@@ -68,25 +68,28 @@ public class Application extends Controller {
 	public static WebSocket<String> monitor() {
 		return new WebSocket<String>() {
 			public void onReady(final WebSocket.In<String> in, final WebSocket.Out<String> out) {
+				final WebSocket<String> thisWebSocket = this;
 
 				// register socket for monitoring
-				Logger.info("WebSocket connected.");
+				Logger.info("WebSocket " + thisWebSocket.hashCode() + " connected.");
 				FalconSocialMonitoringManager.addMonitor(in, out);
 
 				// register request handler
 				in.onMessage(new Callback<String>() {
 					public void invoke(String event) {
-						Logger.info("Received: " + event);
+						Logger.info("WebSocket " + thisWebSocket.hashCode() + " received: " + event);
 					}
 				});
 
 				// register disconnection handler
 				in.onClose(new Callback0() {
 					public void invoke() {
-						Logger.info("WebSocket disconnected.");
+						Logger.info("WebSocket " + thisWebSocket.hashCode() + " disconnected.");
 						FalconSocialMonitoringManager.removeMonitor(in);
 					}
 				});
+
+				out.write("message from server");
 			}
 		};
 	}

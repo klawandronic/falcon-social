@@ -6,4 +6,38 @@
 	
 	<div id="fsoutput"></div>
 	
+	<script type="text/javascript" charset="utf-8">
+
+	    $(function() {
+	    	
+	    	function writeFSMessage(message) {
+	    		var pre = document.createElement("p");
+	    		pre.style.wordWrap = "break-word";
+	    		pre.innerHTML = message;
+	    		
+	    		document.getElementById("fsoutput").appendChild(pre);
+	    	};
+	    	
+	        var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
+	        var fsWebSocket = new WS("@routes.Application.monitor().webSocketURL()");
+	
+	        fsWebSocket.onopen = function() {
+	    		writeFSMessage("WebSocket connected.");
+	    		fsWebSocket.send("message from client");
+	    	};
+	    	fsWebSocket.onclose = function() {
+	    		writeFSMessage("WebSocket disconnected.");
+	    	};
+	    	fsWebSocket.onerror = function(event) {
+	    		writeFSMessage('<span style="color: red;">ERROR: ' + event.data	+ '</span>');
+	    		fsWebSocket.close();
+	    	};
+	    	fsWebSocket.onmessage = function(event) {
+	    		writeFSMessage('<span style="color: blue;">RECEIVED: ' + event.data	+ '</span>');
+	    	};
+	    	
+	    })
+	
+	</script>
+	
 }
